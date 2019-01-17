@@ -1,0 +1,76 @@
+#Создание стека
+
+sys
+ interface stack-port 0/1
+  port int XGigabitEthernet0/0/1 enable 
+  q
+ interface stack-port 0/2
+  port int XGigabitEthernet0/0/2 enable
+  q
+  
+  carrier down-hold-time # это нужно прописать на физическом интерфейсе если стек собирается одним линком 
+  
+  
+  
+  #Удаление стека 
+ sys
+  interface stack-port 1/1
+   shutdown interface XGigabitEthernet 1/0/1
+   undo port interface XGigabitEthernet 1/0/1 enable
+   q
+  interface stack-port 1/2
+   shutdown interface XGigabitEthernet 1/0/2
+   undo port interface XGigabitEthernet 1/0/2 enable 
+   q
+  stack slot 1 renumber 0
+  Агрегация 
+ sys 
+  interface Eth-Trunk1
+   description -= Trunk for Cisco 3560-LiterA =-
+   port link-type trunk
+   q
+  interface XGigabitEthernet0/0/4
+   description -= Eth-Trunk15 =-
+   eth-trunk 15 
+   q
+  interface XGigabitEthernet1/0/4
+   description -= Eth-Trunk15 =-
+   eth-trunk 15 
+   
+   # Удаление влана из транкового порта 
+
+   undo port trunk allow-pass vlan 10
+
+sys 
+  interface Eth-Trunk1
+   description -= Trunk for Cisco 3560-LiterA =-
+   port link-type trunk
+   q 
+   
+interface GigabitEthernet0/0/1
+ description -= ETH-TRUNK 1 to Cisco 3560-LiterA =-
+ eth-trunk 1
+#
+
+interface GigabitEthernet1/0/1
+ description -= ETH-TRUNK 1 to Cisco 33560-LiterA =-
+ eth-trunk 1
+#
+interface GigabitEthernet1/0/48
+ description -= ETH-TRUNK 4 to Cisco 3750-LiterB =-
+ eth-trunk 2
+ 
+ 
+ # Транковый порт
+ interface GigabitEthernet0/0/14
+ description -= Port to router 2811 10.124.1.3 (Delovye linii) =-
+ port link-type trunk
+ port trunk allow-pass vlan 21 98 to 99
+ undo local-preference enable
+ 
+ # Обеденение портов 
+ 
+sys
+port-group 1
+ group-member Ethernet0/0/1 to Ethernet0/0/48
+
